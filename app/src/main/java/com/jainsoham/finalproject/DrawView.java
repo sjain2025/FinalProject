@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PathEffect;
 import android.graphics.DashPathEffect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -13,6 +12,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.util.Random;
 
 public class DrawView extends View {
     private final Paint backboardColor1 = new Paint();
@@ -22,13 +23,28 @@ public class DrawView extends View {
     private final Paint dottedLinePaint = new Paint();
     private float hoopX = 250.0f;
     private float hoopY = 300.0f;
-    private float basketballX = 550.0f;
-    private float basketballY = 1500.0f;
+    private float basketballX;
+    private float basketballY;
     private float basketballSize = 90.0f;
     private float hoopDX = 8.0f;
     private final Path path = new Path();
     private boolean isSwiping = false;
     private float swipeStartX, swipeStartY;
+    private float finalX = 0.0f;
+    private float finalY = 0.0f;
+    private float basketballDX = 0.0f;
+    private float basketballDY = 0.0f;
+
+    private static int score = 0;
+    private ScoreListener scoreListener;
+
+    public interface ScoreListener {
+        void onScoreChanged(int score);
+    }
+
+    public void setScoreListener(ScoreListener listener) {
+        this.scoreListener = listener;
+    }
 
     public DrawView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -36,6 +52,10 @@ public class DrawView extends View {
     }
 
     private void initialize() {
+        Random random = new Random();
+        basketballX = 150.0f + random.nextFloat() * (950.0f - 150.0f);
+        basketballY = 1200.0f + random.nextFloat() * (1800.0f - 1200.0f);
+
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setStrokeWidth(3);
         borderPaint.setColor(Color.BLACK);
@@ -67,6 +87,21 @@ public class DrawView extends View {
         canvas.drawRect(hoopX + 178.0f, hoopY + 118.0f, hoopX + 422.0f, hoopY + 290.0f, borderPaint);
         canvas.drawRect(hoopX + 198.0f, hoopY + 138.0f, hoopX + 402.0f, hoopY + 270.0f, borderPaint);
 
+        canvas.drawCircle(basketballX, basketballY, basketballSize, basketballPaint);
+        canvas.drawCircle(basketballX, basketballY, basketballSize + 2.0f, borderPaint);
+        canvas.drawLine(basketballX, basketballY - basketballSize, basketballX, basketballY + basketballSize, borderPaint);
+        canvas.drawLine(basketballX - basketballSize, basketballY, basketballX + basketballSize, basketballY, borderPaint);
+
+//        int x1 = (int)(basketballX - 0.6f * basketballSize);
+//        int y1 = (int)(basketballY - 0.8f * basketballSize);
+//        int x2 = (int)(basketballX - 0.6f * basketballSize);
+//        int y2 = (int)(basketballY + 0.8f * basketballSize);
+//
+//        x1 = (int)(basketballX + 0.6f * basketballSize);
+//        y1 = (int)(basketballY - 0.8f * basketballSize);
+//        x2 = (int)(basketballX + 0.6f * basketballSize);
+//        y2 = (int)(basketballY + 0.8f * basketballSize);
+
         float cornerRadius = 20.0f;
         canvas.drawRoundRect(hoopX + 170.0f, hoopY + 320.0f, hoopX + 430.0f, hoopY + 348.0f, cornerRadius, cornerRadius, backboardColor1);
         canvas.drawRoundRect(hoopX + 168.0f, hoopY + 318.0f, hoopX + 432.0f, hoopY + 350.0f, cornerRadius, cornerRadius, borderPaint);
@@ -90,43 +125,6 @@ public class DrawView extends View {
         canvas.drawLine(hoopX + 250.0f, hoopY + 340.0f, hoopX + 210.0f, hoopY + 465.0f, borderPaint);
         canvas.drawLine(hoopX + 220.0f, hoopY + 340.0f, hoopX + 195.0f, hoopY + 425.0f, borderPaint);
 
-        canvas.drawCircle(basketballX, basketballY, basketballSize, basketballPaint);
-        canvas.drawCircle(basketballX, basketballY, basketballSize + 2.0f, borderPaint);
-        canvas.drawLine(basketballX, basketballY - basketballSize, basketballX, basketballY + basketballSize, borderPaint);
-        canvas.drawLine(basketballX - basketballSize, basketballY, basketballX + basketballSize, basketballY, borderPaint);
-
-        int x1 = (int)(basketballX - 0.6f * basketballSize);
-        int y1 = (int)(basketballY - 0.8f * basketballSize);
-        int x2 = (int)(basketballX - 0.6f * basketballSize);
-        int y2 = (int)(basketballY + 0.8f * basketballSize);
-        int midX = x1 + ((x2 - x1) / 2);
-        int midY = y1 + ((y2 - y1) / 2);
-        float xDiff = midX - x1;
-        float yDiff = midY - y1;
-        double angle = (Math.atan2(yDiff, xDiff) * (180 / Math.PI)) - 90;
-        double angleRadians = Math.toRadians(angle);
-        float pointX = (float) (midX + 30.0f * Math.cos(angleRadians));
-        float pointY = (float) (midY + 30.0f * Math.sin(angleRadians));
-        path.moveTo(x1, y1);
-        path.cubicTo(x1, y1, pointX, pointY, x2, y2);
-        canvas.drawPath(path, borderPaint);
-
-        x1 = (int)(basketballX + 0.6f * basketballSize);
-        y1 = (int)(basketballY - 0.8f * basketballSize);
-        x2 = (int)(basketballX + 0.6f * basketballSize);
-        y2 = (int)(basketballY + 0.8f * basketballSize);
-
-        midX = x1 + ((x2 - x1) / 2);
-        midY = y1 + ((y2 - y1) / 2);
-        xDiff = midX - x1;
-        yDiff = midY - y1;
-        angle = (Math.atan2(yDiff, xDiff) * (180 / Math.PI)) - 90;
-        angleRadians = Math.toRadians(angle);
-        pointX = (float) (midX - 30.0f * Math.cos(angleRadians));
-        pointY = (float) (midY - 30.0f * Math.sin(angleRadians));
-        path.moveTo(x1, y1);
-        path.cubicTo(x1, y1, pointX, pointY, x2, y2);
-        canvas.drawPath(path, borderPaint);
 
         if (isSwiping) {
             drawDottedLine(canvas);
@@ -138,7 +136,44 @@ public class DrawView extends View {
             hoopDX *= -1;
         }
 
+        if (finalX != 0.0f && finalY != 0.0f) {
+            basketballDX = -1 * (finalX - basketballX) / 10.0f;
+            basketballDY = -1 * (finalY - basketballY) / 10.0f;
+            finalX = 0.0f;
+            finalY = 0.0f;
+        }
+
+        if (basketballX < basketballSize && basketballDX < 0) {
+            basketballDX *= -1;
+        } else if (basketballX > getWidth() - basketballSize && basketballDX > 0) {
+            basketballDX *= -1;
+        }
+        if (basketballY < basketballSize && basketballDY < 0) {
+            basketballDY *= -1;
+        } else if (basketballY > getHeight() - basketballSize && basketballDY > 0) {
+            basketballDY *= -1;
+        }
+
         hoopX += hoopDX;
+        basketballX += basketballDX;
+        basketballY += basketballDY;
+
+        if (basketballDX < 0.0f) {
+            basketballDX += (-1 * basketballDX) / 39.0f;
+        } else if (basketballDX > 0.0f) {
+            basketballDX -= basketballDX / 39.0f;
+        }
+
+        if (basketballDY < 0.0f) {
+            basketballDY -= basketballDY / 39.0f;
+        } else if (basketballDY > 0.0f) {
+            basketballDY -= basketballDY / 39.0f;
+        }
+
+        if (basketballDY > 0.0f && Math.abs(basketballX - (hoopX + 300.0f)) < 160.0f && Math.abs(basketballY - (hoopY + 334.0f)) < 25.0f) {
+            updateScore();
+        }
+
         invalidate();
     }
 
@@ -171,6 +206,8 @@ public class DrawView extends View {
                 return false;
             case MotionEvent.ACTION_UP:
                 isSwiping = false;
+                finalX = event.getX();
+                finalY = event.getY();
                 invalidate();
                 return true;
             default:
@@ -178,9 +215,25 @@ public class DrawView extends View {
         }
     }
 
+    private void updateScore() {
+        score++;
+        if (scoreListener != null) {
+            scoreListener.onScoreChanged(score);
+        }
+        Random random = new Random();
+        basketballX = 150.0f + random.nextFloat() * (950.0f - 150.0f);
+        basketballY = 1200.0f + random.nextFloat() * (1800.0f - 1200.0f);
+        basketballDX = 0.0f;
+        basketballDY = 0.0f;
+    }
+
     private boolean isTouchingBasketball(float x, float y) {
         float dx = x - basketballX;
         float dy = y - basketballY;
         return dx * dx + dy * dy <= basketballSize * basketballSize;
+    }
+
+    public static int getScore() {
+        return score;
     }
 }

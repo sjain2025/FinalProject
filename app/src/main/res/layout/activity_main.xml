@@ -15,4 +15,29 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:id="@+id/drawView" />
 
+    <TextView
+        android:id="@+id/scoreText"
+        android:text="Score: 0"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="25dp"
+        android:textSize="28dp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-condensed"
+        />
+    <TextView
+        android:id="@+id/timeText"
+        android:text="60"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="25dp"
+        android:textAlignment="textEnd"
+        android:textSize="32dp"
+        android:textStyle="bold"
+        android:textColor="@color/red"
+        android:fontFamily="sans-serif-condensed"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
