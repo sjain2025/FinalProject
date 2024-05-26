@@ -69,6 +69,8 @@ public class DrawView extends View {
         dottedLinePaint.setStyle(Paint.Style.STROKE);
         dottedLinePaint.setStrokeWidth(10);
         dottedLinePaint.setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
+
+        score = 0;
     }
 
     @Override
@@ -92,15 +94,26 @@ public class DrawView extends View {
         canvas.drawLine(basketballX, basketballY - basketballSize, basketballX, basketballY + basketballSize, borderPaint);
         canvas.drawLine(basketballX - basketballSize, basketballY, basketballX + basketballSize, basketballY, borderPaint);
 
-//        int x1 = (int)(basketballX - 0.6f * basketballSize);
-//        int y1 = (int)(basketballY - 0.8f * basketballSize);
-//        int x2 = (int)(basketballX - 0.6f * basketballSize);
-//        int y2 = (int)(basketballY + 0.8f * basketballSize);
-//
-//        x1 = (int)(basketballX + 0.6f * basketballSize);
-//        y1 = (int)(basketballY - 0.8f * basketballSize);
-//        x2 = (int)(basketballX + 0.6f * basketballSize);
-//        y2 = (int)(basketballY + 0.8f * basketballSize);
+        // DRAW A CURVE FROM (X1, Y1) TO (X2, Y2)
+        int x1 = (int)(basketballX - 0.6f * basketballSize);
+        int y1 = (int)(basketballY - 0.8f * basketballSize);
+        int x2 = (int)(basketballX - 0.6f * basketballSize);
+        int y2 = (int)(basketballY + 0.8f * basketballSize);
+
+        Path curvePath = new Path();
+        curvePath.moveTo(x1, y1);
+        curvePath.quadTo(basketballX, basketballY, x2, y2);
+        canvas.drawPath(curvePath, borderPaint);
+
+        x1 = (int)(basketballX + 0.6f * basketballSize);
+        y1 = (int)(basketballY - 0.8f * basketballSize);
+        x2 = (int)(basketballX + 0.6f * basketballSize);
+        y2 = (int)(basketballY + 0.8f * basketballSize);
+
+        curvePath = new Path();
+        curvePath.moveTo(x1, y1);
+        curvePath.quadTo(basketballX, basketballY, x2, y2);
+        canvas.drawPath(curvePath, borderPaint);
 
         float cornerRadius = 20.0f;
         canvas.drawRoundRect(hoopX + 170.0f, hoopY + 320.0f, hoopX + 430.0f, hoopY + 348.0f, cornerRadius, cornerRadius, backboardColor1);

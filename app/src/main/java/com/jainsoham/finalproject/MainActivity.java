@@ -7,12 +7,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     DrawView drawView;
     TextView scoreText;
     TextView timeText;
+    Button playAgainButton;
     int time = 60;
     Handler handler = new Handler();
 
@@ -36,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Start countdown
         startCountdown();
     }
 
@@ -59,6 +60,16 @@ public class MainActivity extends AppCompatActivity {
         View scoreView = LayoutInflater.from(this).inflate(R.layout.score, null);
         setContentView(scoreView);
         TextView finalScore = findViewById(R.id.finalScore);
+        playAgainButton = findViewById(R.id.playAgainButton);
         finalScore.setText("" + DrawView.getScore());
+        playAgainButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }
+        });
     }
 }
